@@ -3,12 +3,25 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import YouTube from "react-youtube";
+import { Box, Modal } from "@mui/material";
 
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "80vw",
+  height: "80vh",
+  // bgcolor: "background.paper",
+  border: "2px solid #000",
+};
 
 const Detail = (props) => {
   const { id } = useParams();
   const [detailData, setDetailData] = useState({});
+  const [playerStatus, setPlayerStatus] = useState(false);
   const navigate = useNavigate();
 
   console.log("id:", id);
@@ -26,10 +39,16 @@ const Detail = (props) => {
     fetchData();
   }, [id]);
 
-  
-    const handleClick = () => {
-      navigate('/video'); 
-    };
+  const handleClick = () => {
+    navigate("/video");
+  };
+
+  const handlePlayTrailer = () => {
+    setPlayerStatus(true);
+  };
+  const handlePlayerReady = (event) => {
+    event.target.playVideo();
+  };
 
   return (
     <Container>
@@ -42,15 +61,14 @@ const Detail = (props) => {
       </ImageTitle>
       <ContentMeta>
         <Controls>
-          <Player>
+          <Player onClick={handlePlayTrailer}>
             <img src="/images/play-icon-black.png" alt="" />
-            <span onClick={handleClick}>Play</span>
+            <span>Play Trailer</span>
           </Player>
-          <Trailer>
+          {/* <Trailer onClick={handlePlayTrailer}>
             <img src="/images/play-icon-white.png" alt="" />
             <span>Trailer</span>
-          
-          </Trailer>
+          </Trailer> */}
           <AddList>
             <span />
             <span />
@@ -63,13 +81,43 @@ const Detail = (props) => {
         </Controls>
         <SubTitle>{detailData.subTitle}</SubTitle>
         <Description>{detailData.description}</Description>
+        <Modal
+          open={playerStatus}
+          onClose={() => setPlayerStatus(false)}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <YouTube
+              videoId={detailData?.videoId}
+              opts={{
+                height: "700px",
+                width: "100%",
+                playerVars: {
+                  autoplay: 1,
+                },
+              }}
+              onReady={handlePlayerReady}
+            />
+          </Box>
+        </Modal>
+        {/* {playerStatus && (
+          <YouTube
+            videoId={detailData?.videoId}
+            opts={{
+              height: "100%",
+              width: "100%",
+              playerVars: {
+                autoplay: 1,
+              },
+            }}
+            onReady={handlePlayerReady}
+          />
+        )} */}
       </ContentMeta>
     </Container>
   );
 };
-
-
-
 
 const Container = styled.div`
   position: relative;
@@ -243,6 +291,5 @@ const Description = styled.div`
     font-size: 14px;
   }
 `;
-
 
 export default Detail;
