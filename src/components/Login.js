@@ -1,11 +1,14 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { selectUserName } from "../features/user/userSlice";
+import { useSelector } from "react-redux";
 
 const Login = (props) => {
   const navigate = useNavigate();
 
-  const handleAuth= () =>{
+  const handleAuth = () => {
     navigate("/register");
   };
   return (

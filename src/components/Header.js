@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 import styled from "styled-components";
-import { auth,provider } from '../firebase';
-import{ signInWithPopup } from 'firebase/auth';
+import { auth, provider } from "../firebase";
+import { signInWithPopup } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import {
   selectUserName,
   selectUserPhoto,
@@ -11,37 +11,27 @@ import {
   setSignOutState,
 } from "../features/user/userSlice";
 import { useEffect } from "react";
-import { signOut } from 'firebase/auth';
+import { signOut } from "firebase/auth";
 
-const Header =(props) =>{
+const Header = (props) => {
   const dispatch = useDispatch();
   //const history = useHistory();
   const navigate = useNavigate();
   const userName = useSelector(selectUserName);
   const userPhoto = useSelector(selectUserPhoto);
 
-  useEffect(() => {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        setUser(user);
-        navigate.push("/");
-      }
-    });
-  }, [userName]);
-
-    const handleAuth= () =>{
-      if (!userName) {
-        signInWithPopup(auth, provider)
+  const handleAuth = () => {
+    if (!userName) {
+      signInWithPopup(auth, provider)
         .then((result) => {
           setUser(result.user);
-          navigate("/home");
+          // navigate("/home");
         })
         .catch((error) => {
           alert(error.message);
         });
     } else if (userName) {
-      
-        signOut(auth,provider)
+      signOut(auth, provider)
         .then(() => {
           dispatch(setSignOutState());
           navigate("/");
@@ -50,19 +40,19 @@ const Header =(props) =>{
     }
   };
 
-    const setUser = (user) => {
-      dispatch(
-        setUserLoginDetails({
-          name: user.displayName,
-          email: user.email,
-          photo: user.photoURL,
-        })
-      );
-    };
+  const setUser = (user) => {
+    dispatch(
+      setUserLoginDetails({
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL,
+      })
+    );
+  };
 
-   
-    return(
-        <Nav><Logo>
+  return (
+    <Nav>
+      <Logo>
         <img src="/images/logo.svg" alt="Disney+" />
       </Logo>
       {!userName ? (
@@ -70,11 +60,11 @@ const Header =(props) =>{
       ) : (
         <>
           <NavMenu>
-            <a href="/home">
+            <a href="/">
               <img src="/images/home-icon.svg" alt="HOME" />
               <span>HOME</span>
             </a>
-            <a href='/search'>
+            <a href="/search">
               <img src="/images/search-icon.svg" alt="SEARCH" />
               <span>SEARCH</span>
             </a>
@@ -245,7 +235,7 @@ const SignOut = styled.div`
     ${DropDown} {
       opacity: 1;
       transition-duration: 1s;
-    }                                                                                                                                                                                                                                            
+    }
   }
 `;
 
