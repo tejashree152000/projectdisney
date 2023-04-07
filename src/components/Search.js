@@ -99,8 +99,6 @@ const Search = () => {
     searchData();
   };
 
-  console.log({ searchResults });
-
   return (
     <Container>
       <SearchBar

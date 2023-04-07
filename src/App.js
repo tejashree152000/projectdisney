@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectUserName, setUserLoginDetails } from "./features/user/userSlice";
 import { useEffect, useState } from "react";
 import { auth } from "./firebase";
+import Watchlist from "./components/Watchlist";
 
 function App() {
   const dispatch = useDispatch();
@@ -21,7 +22,6 @@ function App() {
   useEffect(() => {
     auth.onAuthStateChanged(async (user) => {
       if (user) {
-        console.log({ user });
         setUser(user);
         // navigate("/home");
       }
@@ -32,6 +32,7 @@ function App() {
   const setUser = (user) => {
     dispatch(
       setUserLoginDetails({
+        uid: user.uid,
         name: user.displayName,
         email: user.email,
         photo: user.photoURL,
@@ -57,6 +58,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />}></Route>
             <Route path="/detail/:id" element={<Detail />}></Route>
+            <Route path="/watchlist" element={<Watchlist />}></Route>
             <Route path="/video" element={<Playvid />}></Route>
             <Route path="/search" element={<Search />}></Route>
           </Routes>

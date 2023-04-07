@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
-import { collection, doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import YouTube from "react-youtube";
 import { Box, Modal } from "@mui/material";
+import { selectUid } from "../features/user/userSlice";
+import { useSelector } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const style = {
   position: "absolute",
@@ -21,10 +25,10 @@ const style = {
 const Detail = (props) => {
   const { id } = useParams();
   const [detailData, setDetailData] = useState({});
+  const [isInWatchList, setIsInWatchList] = useState(false);
   const [playerStatus, setPlayerStatus] = useState(false);
   const navigate = useNavigate();
-
-  console.log("id:", id);
+  const uid = useSelector(selectUid);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +41,8 @@ const Detail = (props) => {
       }
     };
     fetchData();
+
+    checkIfAlreadyInWatchlist();
   }, [id]);
 
   const handleClick = () => {
@@ -48,6 +54,91 @@ const Detail = (props) => {
   };
   const handlePlayerReady = (event) => {
     event.target.playVideo();
+  };
+
+  const handleAddToWatchList = async () => {
+    const docRef = doc(db, "watchlist", uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      let data = docSnap.data();
+      let list = data.data;
+      list = new Set([...list, id]);
+      console.log(list);
+      await setDoc(
+        doc(db, "watchlist", uid),
+        {
+          data: [...list],
+        },
+        { merge: true }
+      );
+      checkIfAlreadyInWatchlist();
+    } else {
+      console.log("no such document in firebase ");
+      await setDoc(
+        doc(db, "watchlist", uid),
+        {
+          data: [id],
+        },
+        { merge: true }
+      );
+      checkIfAlreadyInWatchlist();
+    }
+  };
+  const handleRemoveFromWatchList = async () => {
+    const docRef = doc(db, "watchlist", uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      let data = docSnap.data();
+      let list = data.data;
+      list = list.filter((item) => item !== id);
+      console.log(list);
+      await setDoc(
+        doc(db, "watchlist", uid),
+        {
+          data: [...list],
+        },
+        { merge: true }
+      );
+
+      checkIfAlreadyInWatchlist();
+      // setDetailData(docSnap.data());
+    } else {
+      console.log("no such document in firebase ");
+    }
+  };
+  const checkIfAlreadyInWatchlist = async () => {
+    const docRef = doc(db, "watchlist", uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      let data = docSnap.data();
+      let list = data.data;
+      console.log({ list, id });
+      setIsInWatchList(list.includes(id));
+
+      // setDetailData(docSnap.data());
+    } else {
+      console.log("no such document in firebase ");
+      setIsInWatchList(false);
+    }
+  };
+  const notify = () =>
+    toast.success(
+      `${detailData.title} Movie ${
+        isInWatchList ? "removed" : "added"
+      } to Watchlist!`,
+      {
+        position: "bottom-right",
+      }
+    );
+  const handleWatchlist = () => {
+    notify();
+    setIsInWatchList((prev) => !prev);
+
+    if (isInWatchList) {
+      handleRemoveFromWatchList();
+    } else {
+      handleAddToWatchList();
+    }
   };
 
   return (
@@ -69,10 +160,15 @@ const Detail = (props) => {
             <img src="/images/play-icon-white.png" alt="" />
             <span>Trailer</span>
           </Trailer> */}
-          <AddList>
+
+          <AddList
+            className={`${isInWatchList ? "watchlist" : ""}`}
+            onClick={handleWatchlist}
+          >
             <span />
             <span />
           </AddList>
+
           <GroupWatch>
             <div>
               <img src="/images/group-icon.png" alt="" />
@@ -115,6 +211,7 @@ const Detail = (props) => {
           />
         )} */}
       </ContentMeta>
+      <ToastContainer />
     </Container>
   );
 };
@@ -231,6 +328,9 @@ const AddList = styled.div`
   border: 2px solid white;
   cursor: pointer;
 
+  &.watchlist {
+    background-color: #00b9ff;
+  }
   span {
     background-color: rgb(249, 249, 249);
     display: inline-block;

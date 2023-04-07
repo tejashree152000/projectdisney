@@ -7,10 +7,10 @@ import Originals from "./Originals";
 import Trending from "./Trending";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {collection,onSnapshot} from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { setMovies } from "../features/movie/movieSlice";
 import { selectUserName } from "../features/user/userSlice";
-import {db} from "../firebase";
+import { db } from "../firebase";
 
 const Home = (props) => {
   const dispatch = useDispatch();
@@ -21,10 +21,8 @@ const Home = (props) => {
   let trending = [];
 
   useEffect(() => {
-    console.log("hello");
-    onSnapshot(collection(db,"movies"),(snapshot) => {
+    onSnapshot(collection(db, "movies"), (snapshot) => {
       snapshot.docs.map((doc) => {
-        console.log(recommends);
         switch (doc.data().type) {
           case "recommend":
             recommends = [...recommends, { id: doc.id, ...doc.data() }];
@@ -54,17 +52,16 @@ const Home = (props) => {
       );
     });
   }, [userName]);
-    return(
-        <Container>
-         <ImgSlider/>  
-         <Viewers/>
-         <Recommends/>
-         <NewDisney/>
-         <Originals/>
-         <Trending/>
-        </Container>
-         
-    )
+  return (
+    <Container>
+      <ImgSlider />
+      <Viewers />
+      <Recommends />
+      <NewDisney />
+      <Originals />
+      <Trending />
+    </Container>
+  );
 };
 
 const Container = styled.main`
